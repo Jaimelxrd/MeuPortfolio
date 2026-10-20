@@ -130,7 +130,7 @@ select:focus-visible {
 }
 .taskbar {
   position: absolute;
-  z-index: 50;
+  z-index: 100;
   bottom: 0;
   left: 0;
   right: 0;
@@ -265,7 +265,7 @@ select:focus-visible {
 .start-menu,
 .calendar-pop {
   position: absolute;
-  z-index: 60;
+  z-index: 110;
   bottom: 57px;
   background: var(--panel);
   border: 1px solid var(--line);
@@ -411,6 +411,35 @@ select:focus-visible {
 }
 .start-footer button + button {
   margin-left: 5px;
+}
+.power-options {
+  position: absolute;
+  right: 18px;
+  bottom: 62px;
+  z-index: 1;
+  width: 170px;
+  padding: 6px;
+  border: 1px solid var(--line);
+  border-radius: 9px;
+  background: var(--panel-solid);
+  box-shadow: 0 12px 32px #0006;
+  animation: rise 0.14s ease-out;
+}
+.power-options button {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 9px 10px;
+  border: 0;
+  border-radius: 6px;
+  color: var(--text);
+  background: transparent;
+  text-align: left;
+  font-size: 11px;
+}
+.power-options button:hover {
+  background: var(--surface2);
 }
 .search-results {
   max-height: 380px;
@@ -1832,6 +1861,12 @@ select:focus-visible {
   font-size: 9px;
   color: var(--muted);
 }
+.recycle-items p {
+  margin: 3px 0 0;
+  color: var(--muted);
+  font-size: 10px;
+  line-height: 1.55;
+}
 .recycle-items button {
   border: 1px solid var(--line);
   border-radius: 4px;
@@ -1925,6 +1960,119 @@ select:focus-visible {
 }
 .toast svg {
   color: #68d6a1;
+}
+.shutdown-screen {
+  position: absolute;
+  inset: 0;
+  z-index: 200;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 24px;
+  text-align: center;
+  color: #edf1f8;
+  background: rgba(8, 13, 23, 0.94);
+  backdrop-filter: blur(14px);
+  animation: fade 0.25s ease-out;
+}
+.shutdown-screen h2,
+.shutdown-screen p {
+  margin: 0;
+}
+.shutdown-screen h2 {
+  font-size: clamp(22px, 4vw, 32px);
+}
+.shutdown-screen p {
+  color: #aeb9ca;
+  font-size: 14px;
+}
+.shutdown-spinner {
+  width: 38px;
+  height: 38px;
+  border: 3px solid rgba(255, 255, 255, 0.2);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: shutdown-spin 0.8s linear infinite;
+}
+.farewell-character {
+  position: relative;
+  width: 76px;
+  height: 100px;
+  margin-bottom: 8px;
+  transform-origin: center bottom;
+  animation: farewell-walk 1.8s ease-in forwards;
+}
+.farewell-head,
+.farewell-body,
+.farewell-arm,
+.farewell-leg {
+  position: absolute;
+  display: block;
+  border: 3px solid var(--accent);
+}
+.farewell-head {
+  top: 2px;
+  left: 27px;
+  width: 23px;
+  height: 23px;
+  border-radius: 50%;
+  background: #111b2a;
+}
+.farewell-body {
+  top: 28px;
+  left: 27px;
+  width: 23px;
+  height: 36px;
+  border-radius: 12px 12px 8px 8px;
+  background: var(--accent);
+}
+.farewell-arm {
+  top: 30px;
+  left: 14px;
+  width: 21px;
+  height: 8px;
+  border-width: 3px 0 0;
+  transform: rotate(-34deg);
+  transform-origin: right center;
+  animation: farewell-wave 0.35s ease-in-out 3 alternate;
+}
+.farewell-leg {
+  top: 59px;
+  left: 29px;
+  width: 8px;
+  height: 26px;
+  border-width: 0 0 0 3px;
+  transform-origin: top center;
+  animation: farewell-step 0.22s ease-in-out infinite alternate;
+}
+.farewell-leg-right {
+  left: 41px;
+  animation-delay: 0.22s;
+}
+.farewell-ground {
+  position: absolute;
+  bottom: 2px;
+  left: 13px;
+  width: 50px;
+  height: 2px;
+  border-radius: 50%;
+  background: #aeb9ca66;
+}
+@keyframes shutdown-spin {
+  to { transform: rotate(360deg); }
+}
+@keyframes farewell-wave {
+  to { transform: rotate(28deg); }
+}
+@keyframes farewell-step {
+  to { transform: rotate(-28deg); }
+}
+@keyframes farewell-walk {
+  0%, 32% { transform: translateY(0) scale(1); opacity: 1; }
+  42% { transform: translateY(-2px) rotateY(180deg) scale(0.98); opacity: 1; }
+  100% { transform: translateY(-135px) rotateY(180deg) scale(0.28); opacity: 0; }
 }
 @keyframes rise {
   from {

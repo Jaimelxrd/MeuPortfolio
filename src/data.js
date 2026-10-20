@@ -77,6 +77,16 @@ export const certificates = [
     validationCode: "dcceb23e9181295d65a03f316e7cc48e",
     image: "",
   },
+  {
+    name: "Software Development",
+    provider: "Power Learn Project",
+    workload: "Programa de 16 semanas",
+    issued: "",
+    validationUrl:
+      "https://academy.powerlearnprojectafrica.org/certificates?scholarship=76a52676-d442-41af-b6bd-69e1c3ecfa2b&certId=c5955d93-c705-4eb9-9002-bb4a941d60a3",
+    validationCode: "c5955d93-c705-4eb9-9002-bb4a941d60a3",
+    image: "",
+  },
 ];
 
 export const experience = [
@@ -458,5 +468,30 @@ export const fileTree = {
       body: item.url,
     })),
   ],
-  Reciclagem: [],
+  Reciclagem: [
+    {
+      name: "lembrete-para-continuar.txt",
+      type: "file",
+      origin: "Desktop",
+      body: "Mesmo um passo pequeno ainda é progresso. Continua a aprender, a praticar e a construir.",
+    },
+    {
+      name: "nota-de-desanimo.txt",
+      type: "file",
+      origin: "Documentos",
+      body: "Hoje parece que nada vai dar certo e que não sou capaz de terminar. Vou guardar esta nota como lembrança de um dia difícil, não como definição do meu futuro.",
+    },
+    {
+      name: "ideia-que-ficou-pelo-caminho.txt",
+      type: "file",
+      origin: "Projetos",
+      body: "Nem toda ideia precisa virar um projeto. Posso aprender com esta tentativa, descansar e voltar com uma abordagem diferente.",
+    },
+    {
+      name: "frase-motivacional-antiga.txt",
+      type: "file",
+      origin: "Desktop",
+      body: "Não preciso saber tudo para começar. Aprendo enquanto faço, erro, corrijo e tento outra vez.",
+    },
+  ],
 };

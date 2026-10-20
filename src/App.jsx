@@ -45,6 +45,8 @@ import {
   Github,
   Linkedin,
   Command,
+  Settings,
+  Trash2,
 } from "lucide-react";
 
 const defaults = {
@@ -80,9 +82,11 @@ export default function App() {
   const [windows, setWindows] = useState(initialWindows),
     [z, setZ] = useState(5),
     [start, setStart] = useState(false),
+    [powerOptions, setPowerOptions] = useState(false),
     [query, setQuery] = useState(""),
     [context, setContext] = useState(null),
     [toast, setToast] = useState(""),
+    [shutdownStage, setShutdownStage] = useState(null),
     [settings, setSettings] = useState(loadSettings),
     [time, setTime] = useState(new Date()),
     [calendar, setCalendar] = useState(false),
@@ -97,7 +101,9 @@ export default function App() {
     [fileMenu, setFileMenu] = useState(null),
     [doc, setDoc] = useState(null);
   const drag = useRef(null),
-    searchRef = useRef(null);
+    searchRef = useRef(null),
+    startButtonRef = useRef(null),
+    startMenuRef = useRef(null);
   useEffect(() => {
     const t = setInterval(() => setTime(new Date()), 1000);
     return () => clearInterval(t);
@@ -107,9 +113,6 @@ export default function App() {
   }, [settings]);
   useEffect(() => {
     const close = (event) => {
-      if (!event.target.closest(".start-menu, .task-start, .task-search")) {
-        setStart(false);
-      }
       if (!event.target.closest(".context-menu")) setContext(null);
       if (!event.target.closest(".file-context")) {
         setFileMenu(null);
@@ -162,6 +165,20 @@ export default function App() {
       window.removeEventListener("keydown", key);
     };
   }, [windows, active]);
+  useEffect(() => {
+    if (!start) return;
+    const closeStartOutside = (event) => {
+      const target = event.target instanceof Element ? event.target : null;
+      if (
+        startMenuRef.current?.contains(target) ||
+        startButtonRef.current?.contains(target) ||
+        target?.closest(".task-search")
+      ) return;
+      setStart(false);
+    };
+    document.addEventListener("pointerdown", closeStartOutside);
+    return () => document.removeEventListener("pointerdown", closeStartOutside);
+  }, [start]);
   const say = (s) => {
     if (!settings.notifications) return;
     setToast(s);
@@ -511,10 +528,21 @@ export default function App() {
         return null;
     }
   };
-  const toggleMenu = (e) => {
-    e.stopPropagation();
+  const toggleMenu = () => {
     setStart((v) => !v);
     setContext(null);
+  };
+  const shutdown = () => {
+    setStart(false);
+    setPowerOptions(false);
+    setShutdownStage("processing");
+    window.setTimeout(() => {
+      setShutdownStage("farewell");
+      window.setTimeout(() => {
+        if (window.history.length > 1) window.history.back();
+        else setShutdownStage(null);
+      }, 1800);
+    }, 1100);
   };
   return (
     <div
@@ -621,6 +649,7 @@ export default function App() {
       <div className="taskbar">
         <div className="task-left">
           <button
+            ref={startButtonRef}
             className={`task-start ${start ? "on" : ""}`}
             onClick={toggleMenu}
             aria-label="Iniciar"
@@ -699,7 +728,7 @@ export default function App() {
         </div>
       </div>
       {start && (
-        <div className="start-menu" onClick={(e) => e.stopPropagation()}>
+        <div ref={startMenuRef} className="start-menu">
           <div className="start-search">
             <Search size={17} />
             <input
@@ -780,15 +809,24 @@ export default function App() {
               <Settings size={17} />
             </button>
             <button
-              title="Encerrar experiência"
-              onClick={() => {
-                setStart(false);
-                say("Obrigado por visitar o meu portfólio");
-              }}
+              title="Opções de energia"
+              aria-label="Opções de energia"
+              aria-expanded={powerOptions}
+              onClick={() => setPowerOptions((open) => !open)}
             >
               <Power size={17} />
             </button>
           </footer>
+          {powerOptions && (
+            <div className="power-options">
+              <button onClick={shutdown}>
+                <Power size={15} /> Sair
+              </button>
+              <button onClick={() => window.location.reload()}>
+                <RotateCcw size={15} /> Recarregar
+              </button>
+            </div>
+          )}
         </div>
       )}
       {calendar && (
@@ -907,6 +945,30 @@ export default function App() {
         <div className="toast">
           <Check size={16} />
           {toast}
+        </div>
+      )}
+      {shutdownStage && (
+        <div className="shutdown-screen" role="status" aria-live="polite">
+          {shutdownStage === "processing" ? (
+            <>
+              <span className="shutdown-spinner" aria-hidden="true" />
+              <h2>Processando…</h2>
+              <p>Encerrando a visita</p>
+            </>
+          ) : (
+            <>
+              <div className="farewell-character" aria-hidden="true">
+                <span className="farewell-head" />
+                <span className="farewell-body" />
+                <span className="farewell-arm" />
+                <span className="farewell-leg farewell-leg-left" />
+                <span className="farewell-leg farewell-leg-right" />
+                <span className="farewell-ground" />
+              </div>
+              <h2>Até logo!</h2>
+              <p>Obrigado pela visita. Foi um prazer receber você!</p>
+            </>
+          )}
         </div>
       )}
     </div>
@@ -1096,7 +1158,7 @@ function About() {
           <div className="section-heading">
             <div>
               <span className="eyebrow">FORMAÇÃO COMPLEMENTAR</span>
-              <h4>Certificados FIAP</h4>
+              <h4>Certificados</h4>
             </div>
             <span className="count-pill">{certificates.length}</span>
           </div>
@@ -1107,11 +1169,18 @@ function About() {
                   <img
                     className="certificate-image"
                     src={certificate.image}
-                    alt={`Certificado ${certificate.name} emitido pela FIAP`}
+                    alt={`Certificado ${certificate.name} emitido por ${certificate.provider}`}
                   />
                 ) : (
                   <div className="certificate-mark">
-                    FIAP <span>NANO COURSE</span>
+                    {certificate.provider === "Power Learn Project"
+                      ? "PLP"
+                      : certificate.provider.split(" ")[0]}
+                    <span>
+                      {certificate.provider.startsWith("FIAP")
+                        ? "NANO COURSE"
+                        : "POWER LEARN PROJECT"}
+                    </span>
                   </div>
                 )}
                 <span className="certificate-kind">
@@ -1121,7 +1190,7 @@ function About() {
                 <p>
                   {certificate.provider} · {certificate.workload}
                 </p>
-                <p>Emitido em {certificate.issued}</p>
+                {certificate.issued && <p>Emitido em {certificate.issued}</p>}
                 <code className="certificate-code">
                   {certificate.validationCode}
                 </code>
@@ -1147,9 +1216,7 @@ function About() {
             ))}
           </div>
           <p className="certificate-note">
-            Confirma cada certificado na página oficial FIAP com o respetivo
-            código de validação.
-          </p>
+            Confirma cada certificado na página oficial da respetiva instituição.</p>
         </section>
       </div>
     </div>
@@ -1215,7 +1282,7 @@ function Resume() {
             {certificates.map((certificate) => (
               <li key={certificate.name}>
                 <b>{certificate.name}</b> — {certificate.workload},{" "}
-                {certificate.issued}.{" "}
+                {certificate.issued && `${certificate.issued}. `}
                 <a
                   href={certificate.validationUrl}
                   target="_blank"
@@ -1565,11 +1632,12 @@ function Recycle({ say }) {
       {items.length ? (
         <div className="recycle-items">
           {items.map((item, i) => (
-            <div key={i}>
+            <div className="recycle-item" key={`${item.name}-${i}`}>
               <FileText size={18} />
               <span>
                 <b>{item.name}</b>
                 <small>Local original: {item.origin || "Desconhecido"}</small>
+                {item.body && <p>{item.body}</p>}
               </span>
               <button
                 onClick={() => {

@@ -855,6 +855,16 @@ select:focus-visible {
   color: var(--accent);
   font-size: 9px;
 }
+.project-status {
+  display: inline-flex;
+  margin: 0 0 4px 7px;
+  padding: 3px 6px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  color: var(--muted);
+  font-size: 8px;
+  vertical-align: middle;
+}
 .project-info h3 {
   font:
     600 14px Manrope,
@@ -878,6 +888,35 @@ select:focus-visible {
   padding: 4px 6px;
   background: rgba(255, 255, 255, 0.07);
   border-radius: 4px;
+}
+.project-details {
+  margin-top: 12px;
+  border-top: 1px solid var(--line);
+  padding-top: 9px;
+  color: var(--muted);
+  font-size: 9px;
+}
+.project-details summary {
+  color: var(--text);
+  cursor: pointer;
+}
+.project-details p {
+  margin: 8px 0 4px;
+}
+.project-details ul,
+.timeline ul {
+  margin: 7px 0 0;
+  padding-left: 16px;
+  color: var(--muted);
+  font-size: 9px;
+  line-height: 1.7;
+}
+.project-details a {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  margin-top: 8px;
+  color: var(--accent);
 }
 .about-top {
   display: flex;
@@ -932,6 +971,145 @@ select:focus-visible {
   font-size: 12px;
   line-height: 1.85;
   color: #bcc7d6;
+}
+.about-section,
+.about-interests {
+  padding: 12px 0;
+  border-bottom: 1px solid var(--line);
+}
+.about-section h4,
+.about-interests h4,
+.complementary-skills h3 {
+  margin: 0 0 7px;
+  font:
+    600 12px Manrope,
+    sans-serif;
+}
+.about-section p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 11px;
+  line-height: 1.75;
+}
+.about-interests .tag-row {
+  margin-top: 10px;
+}
+.about-certificates {
+  padding-top: 18px;
+  margin-top: 18px;
+  border-top: 1px solid var(--line);
+}
+.section-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+.section-heading h4 {
+  margin: 5px 0 0;
+  font:
+    600 14px Manrope,
+    sans-serif;
+}
+.certificate-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 11px;
+}
+.certificate-card {
+  min-width: 0;
+  padding: 14px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: linear-gradient(
+    145deg,
+    rgba(255, 255, 255, 0.055),
+    transparent 70%
+  );
+}
+.certificate-image {
+  display: block;
+  width: 100%;
+  max-height: 200px;
+  margin-bottom: 12px;
+  border-radius: 4px;
+  background: rgba(0, 0, 0, 0.15);
+  object-fit: contain;
+  object-position: left center;
+}
+.certificate-mark {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  color: #e64986;
+  font:
+    500 19px Manrope,
+    sans-serif;
+  letter-spacing: 1.5px;
+}
+.certificate-mark span {
+  padding: 3px 5px;
+  background: #e64986;
+  color: #fff;
+  font:
+    700 7px "DM Sans",
+    sans-serif;
+  letter-spacing: 0.5px;
+}
+.certificate-kind {
+  display: block;
+  margin-top: 16px;
+  color: var(--muted);
+  font-size: 8px;
+  letter-spacing: 1px;
+}
+.certificate-card h5 {
+  margin: 6px 0;
+  font:
+    600 15px Manrope,
+    sans-serif;
+}
+.certificate-card p,
+.certificate-note {
+  margin: 4px 0;
+  color: var(--muted);
+  font-size: 9px;
+  line-height: 1.6;
+}
+.certificate-code {
+  display: block;
+  margin-top: 10px;
+  padding: 7px;
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  color: var(--text);
+  font: 8px/1.5 monospace;
+  overflow-wrap: anywhere;
+}
+.certificate-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 12px;
+  margin-top: 11px;
+}
+.certificate-actions a,
+.certificate-actions button {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--accent);
+  font-size: 9px;
+  text-decoration: none;
+}
+.certificate-actions a:hover,
+.certificate-actions button:hover {
+  text-decoration: underline;
+}
+.certificate-note {
+  margin-top: 10px;
 }
 .about-stats {
   display: grid;
@@ -1014,6 +1192,9 @@ select:focus-visible {
   color: var(--muted);
   margin: 0;
 }
+.timeline ul {
+  margin-bottom: 0;
+}
 .resume-subhead {
   margin-top: 20px;
 }
@@ -1024,8 +1205,24 @@ select:focus-visible {
 .language-line span {
   color: var(--text);
 }
+.resume-certificates {
+  margin: 0;
+  padding-left: 15px;
+  color: var(--muted);
+  font-size: 9px;
+  line-height: 1.7;
+}
+.resume-certificates a {
+  color: var(--accent);
+}
 .skills-list {
   margin-top: 22px;
+}
+.complementary-skills {
+  padding: 18px 0 4px;
+}
+.complementary-skills .tag-row {
+  margin-top: 10px;
 }
 .skill-group {
   display: grid;
@@ -1061,6 +1258,9 @@ select:focus-visible {
   border: 1px solid var(--line);
   border-radius: 5px;
   background: rgba(255, 255, 255, 0.025);
+}
+.skill-tags i {
+  display: none;
 }
 .skill-tags i {
   position: absolute;
@@ -1110,6 +1310,9 @@ select:focus-visible {
   display: grid;
   gap: 8px;
 }
+.contact-hero > .primary + .primary {
+  margin-left: 7px;
+}
 .contact-links > div > span,
 .contact-links > a small {
   font-size: 8px;
@@ -1157,6 +1360,14 @@ select:focus-visible {
   align-items: center;
   gap: 7px;
   margin-top: 18px;
+}
+.contact-empty {
+  padding: 20px 14px;
+  border: 1px dashed var(--line);
+  border-radius: 7px;
+  color: var(--muted);
+  font-size: 10px;
+  text-align: center;
 }
 .settings-layout {
   height: 100%;
@@ -1854,6 +2065,9 @@ select:focus-visible {
   .project-info p {
     font-size: 10px;
   }
+  .certificate-grid {
+    grid-template-columns: 1fr;
+  }
   .contact-links {
     grid-template-columns: 1fr;
   }
@@ -1980,5 +2194,58 @@ select:focus-visible {
     animation-duration: 0.01ms !important;
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
+  }
+}
+@media print {
+  body * {
+    visibility: hidden !important;
+  }
+  .desktop,
+  .window:has(.resume-app),
+  .window:has(.resume-app) .window-content,
+  .resume-app,
+  .resume-app * {
+    visibility: visible !important;
+  }
+  .desktop {
+    position: static;
+    overflow: visible;
+    background: white;
+    color: #111;
+  }
+  .desktop > :not(.window),
+  .window:has(.resume-app) .titlebar {
+    display: none !important;
+  }
+  .window:has(.resume-app) {
+    position: static;
+    display: block;
+    width: 100%;
+    height: auto;
+    overflow: visible;
+    border: 0;
+    box-shadow: none;
+    background: white;
+    color: #111;
+  }
+  .window:has(.resume-app) .window-content,
+  .resume-app {
+    height: auto;
+    overflow: visible;
+    background: white;
+    color: #111;
+  }
+  .resume-app .eyebrow,
+  .resume-app h2,
+  .resume-app h3,
+  .resume-app h4,
+  .resume-app p,
+  .resume-app li,
+  .resume-app .timeline span,
+  .resume-app .language-line span {
+    color: #111 !important;
+  }
+  .resume-app .primary {
+    display: none;
   }
 }

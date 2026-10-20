@@ -6,13 +6,19 @@ import {
   skills,
   wallpapers,
   fileTree,
+  aboutSections,
+  education,
+  experience,
+  complementarySkills,
+  interests,
+  languages,
+  certificates,
 } from "./data.js";
 import {
   Search,
   Wifi,
   Volume2,
   Battery,
-  ChevronUp,
   CalendarDays,
   Power,
   Minimize2,
@@ -30,18 +36,15 @@ import {
   ExternalLink,
   Copy,
   Check,
-  MoreHorizontal,
   Monitor,
   Palette,
   RotateCcw,
-  Menu,
-  Maximize2,
   Download,
   Mail,
+  MessageCircle,
   Github,
   Linkedin,
   Command,
-  Clock3,
 } from "lucide-react";
 
 const defaults = {
@@ -103,9 +106,14 @@ export default function App() {
     localStorage.setItem("portfolio-settings", JSON.stringify(settings));
   }, [settings]);
   useEffect(() => {
-    const close = () => {
-      setContext(null);
-      setFileMenu(null);
+    const close = (event) => {
+      if (!event.target.closest(".start-menu, .task-start, .task-search")) {
+        setStart(false);
+      }
+      if (!event.target.closest(".context-menu")) setContext(null);
+      if (!event.target.closest(".file-context")) {
+        setFileMenu(null);
+      }
     };
     const key = (e) => {
       if (e.key === "Escape") {
@@ -161,9 +169,17 @@ export default function App() {
   };
   const focus = (id) => {
     setActive(id);
-    setZ((v) => v + 1);
-    setWindows((v) =>
-      v.map((w) => (w.id === id ? { ...w, minimized: false, z: z + 1 } : w)),
+    const ordered = [
+      ...windows.filter((w) => w.id !== id).sort((a, b) => a.z - b.z),
+      ...windows.filter((w) => w.id === id),
+    ];
+    setZ(ordered.length + 6);
+    setWindows(
+      ordered.map((w, index) => ({
+        ...w,
+        minimized: w.id === id ? false : w.minimized,
+        z: index + 6,
+      })),
     );
   };
   const open = (id, extra = {}) => {
@@ -178,7 +194,8 @@ export default function App() {
     }
     let app = apps.find((a) => a.id === id);
     let wid = id + "-" + Date.now();
-    setZ((v) => v + 1);
+    const nextZ = Math.max(5, ...windows.map((w) => w.z)) + 1;
+    setZ(nextZ);
     setWindows((v) => [
       ...v,
       {
@@ -189,7 +206,7 @@ export default function App() {
         y: Math.max(24, window.innerHeight / 2 - 280 + Math.random() * 30),
         w: 840,
         h: 570,
-        z: z + 1,
+        z: nextZ,
         minimized: false,
         maximized: window.innerWidth < 700,
         restore: null,
@@ -250,11 +267,20 @@ export default function App() {
         });
     });
     projects.forEach((p) => {
-      if ((p.name + p.stack + p.description).toLowerCase().includes(q))
+      const projectSearchText = [
+        p.name,
+        p.description,
+        p.type,
+        ...p.technologies,
+        ...p.features,
+      ]
+        .join(" ")
+        .toLowerCase();
+      if (projectSearchText.includes(q))
         out.push({
           name: p.name,
           type: "Projeto",
-          desc: p.stack,
+          desc: p.technologies.join(" · "),
           act: () => open("projects"),
         });
     });
@@ -283,6 +309,43 @@ export default function App() {
             },
           });
       });
+    });
+    skills.forEach((category) => {
+      category.items.forEach((skill) => {
+        if (`${skill} ${category.group}`.toLowerCase().includes(q))
+          out.push({
+            name: skill,
+            type: "Competência",
+            desc: category.group,
+            act: () => open("skills"),
+          });
+      });
+    });
+    education.forEach((item) => {
+      if (
+        `${item.degree} ${item.institution} ${item.focus}`
+          .toLowerCase()
+          .includes(q)
+      )
+        out.push({
+          name: item.degree,
+          type: "Formação",
+          desc: item.institution,
+          act: () => open("resume"),
+        });
+    });
+    experience.forEach((item) => {
+      if (
+        `${item.role} ${item.description} ${item.activities.join(" ")}`
+          .toLowerCase()
+          .includes(q)
+      )
+        out.push({
+          name: item.role,
+          type: "Experiência",
+          desc: item.description,
+          act: () => open("resume"),
+        });
     });
     if (
       profile.about.toLowerCase().includes(q) ||
@@ -406,7 +469,7 @@ export default function App() {
   const renderApp = (w) => {
     switch (w.app) {
       case "home":
-        return <Home open={open} say={say} />;
+        return <Home open={open} />;
       case "computer":
         return (
           <Explorer
@@ -435,7 +498,7 @@ export default function App() {
       case "about":
         return <About />;
       case "resume":
-        return <Resume say={say} />;
+        return <Resume />;
       case "skills":
         return <Skills />;
       case "contacts":
@@ -561,6 +624,7 @@ export default function App() {
             className={`task-start ${start ? "on" : ""}`}
             onClick={toggleMenu}
             aria-label="Iniciar"
+            aria-expanded={start}
           >
             <span className="winmark">
               <i />
@@ -710,7 +774,7 @@ export default function App() {
             </>
           )}
           <footer className="start-footer">
-            <span className="profile-avatar">J</span>
+            <span className="profile-avatar">JN</span>
             <b>{profile.name}</b>
             <button title="Definições" onClick={() => open("settings")}>
               <Settings size={17} />
@@ -791,7 +855,14 @@ export default function App() {
           }}
           onClick={(e) => e.stopPropagation()}
         >
-          <button onClick={() => openFile(fileMenu.item)}>Abrir</button>
+          <button
+            onClick={() => {
+              openFile(fileMenu.item);
+              setFileMenu(null);
+            }}
+          >
+            Abrir
+          </button>
           <button
             onClick={() => {
               navigator.clipboard?.writeText(fileMenu.item.name);
@@ -842,18 +913,16 @@ export default function App() {
   );
 }
 
-function Home({ open, say }) {
+function Home({ open }) {
   return (
     <div className="home-app">
       <div className="welcome-panel">
-        <span className="eyebrow">PORTFOLIO · 2026</span>
+        <span className="eyebrow">PORTFÓLIO PESSOAL</span>
         <h1>
           Olá, eu sou {profile.name}
           <span>.</span>
         </h1>
-        <p>
-          {profile.role} a construir experiências digitais úteis e memoráveis.
-        </p>
+        <p>{profile.summary}</p>
         <div className="welcome-actions">
           <button className="primary" onClick={() => open("projects")}>
             Explorar projetos <ArrowRight size={16} />
@@ -863,9 +932,7 @@ function Home({ open, say }) {
           </button>
         </div>
         <div className="welcome-meta">
-          <span>
-            <span className="online-dot" /> Disponível para oportunidades
-          </span>
+          <span>{profile.role}</span>
           <span>{profile.location}</span>
         </div>
       </div>
@@ -875,7 +942,9 @@ function Home({ open, say }) {
           onClick={() => open("projects")}
         >
           <div className="card-heading">
-            <span>EM DESTAQUE</span>
+            <span>
+              {projects[0].provisional ? "EXEMPLO PROVISÓRIO" : "EM DESTAQUE"}
+            </span>
             <ArrowRight size={16} />
           </div>
           <div
@@ -934,24 +1003,48 @@ function Projects() {
               style={{ backgroundImage: `url(${p.image})` }}
             >
               <span>0{i + 1}</span>
-              <a
-                href={p.url}
-                target="_blank"
-                rel="noreferrer"
-                aria-label="Abrir projeto"
-              >
-                <ExternalLink size={17} />
-              </a>
+              {p.sourceUrl && (
+                <a
+                  href={p.sourceUrl}
+                  target="_blank"
+                  rel="noreferrer"
+                  aria-label={`Ver código de ${p.name}`}
+                >
+                  <Github size={17} />
+                </a>
+              )}
             </div>
             <div className="project-info">
               <small>{p.type}</small>
+              <span className="project-status">
+                {p.provisional ? "Conteúdo provisório" : p.status}
+              </span>
               <h3>{p.name}</h3>
               <p>{p.description}</p>
               <div className="tag-row">
-                {p.stack.split(" · ").map((t) => (
+                {p.technologies.map((t) => (
                   <span key={t}>{t}</span>
                 ))}
               </div>
+              <details className="project-details">
+                <summary>Detalhes do projeto</summary>
+                <p>
+                  <b>Problema:</b> {p.problem}
+                </p>
+                <p>
+                  <b>Solução:</b> {p.solution}
+                </p>
+                <ul>
+                  {p.features.map((feature) => (
+                    <li key={feature}>{feature}</li>
+                  ))}
+                </ul>
+                {p.demoUrl && (
+                  <a href={p.demoUrl} target="_blank" rel="noreferrer">
+                    Demonstração <ExternalLink size={13} />
+                  </a>
+                )}
+              </details>
             </div>
           </article>
         ))}
@@ -963,103 +1056,184 @@ function About() {
   return (
     <div className="app-scroll about-app">
       <div className="about-top">
-        <div className="portrait">
-          J<span className="online-dot" />
-        </div>
+        <div className="portrait">JN</div>
         <div>
           <span className="eyebrow">UM POUCO SOBRE MIM</span>
           <h2>
             {profile.name} <span className="muted">— {profile.role}</span>
           </h2>
           <p className="location-line">
-            {profile.location} <span>·</span> Curioso por tecnologia e design
+            {profile.location} <span>·</span> {education[0].institution}
           </p>
         </div>
       </div>
       <div className="about-copy">
         <h3>Olá, mundo.</h3>
-        <p>{profile.about}</p>
-        <p>
-          Gosto de aprender construindo: cada projeto é uma oportunidade para
-          explorar novas ferramentas, resolver problemas reais e cuidar dos
-          detalhes que tornam um produto intuitivo.
-        </p>
-        <div className="about-stats">
-          <div>
-            <b>06</b>
-            <span>Projetos de demonstração</span>
+        <p>{profile.summary}</p>
+        <section className="about-section">
+          <h4>Percurso académico</h4>
+          <p>
+            <b>{education[0].degree}</b> · {education[0].institution}. Formação
+            em curso, com foco de interesse em{" "}
+            {education[0].focus.toLowerCase()}.
+          </p>
+        </section>
+        {aboutSections.map((section) => (
+          <section className="about-section" key={section.title}>
+            <h4>{section.title}</h4>
+            <p>{section.description}</p>
+          </section>
+        ))}
+        <section className="about-interests">
+          <h4>Interesses</h4>
+          <div className="tag-row">
+            {interests.map((item) => (
+              <span key={item}>{item}</span>
+            ))}
           </div>
-          <div>
-            <b>03+</b>
-            <span>Anos a aprender e criar</span>
+        </section>
+        <section className="about-certificates">
+          <div className="section-heading">
+            <div>
+              <span className="eyebrow">FORMAÇÃO COMPLEMENTAR</span>
+              <h4>Certificados FIAP</h4>
+            </div>
+            <span className="count-pill">{certificates.length}</span>
           </div>
-          <div>
-            <b>∞</b>
-            <span>Curiosidade</span>
+          <div className="certificate-grid">
+            {certificates.map((certificate) => (
+              <article className="certificate-card" key={certificate.name}>
+                {certificate.image ? (
+                  <img
+                    className="certificate-image"
+                    src={certificate.image}
+                    alt={`Certificado ${certificate.name} emitido pela FIAP`}
+                  />
+                ) : (
+                  <div className="certificate-mark">
+                    FIAP <span>NANO COURSE</span>
+                  </div>
+                )}
+                <span className="certificate-kind">
+                  CERTIFICADO DE CONCLUSÃO
+                </span>
+                <h5>{certificate.name}</h5>
+                <p>
+                  {certificate.provider} · {certificate.workload}
+                </p>
+                <p>Emitido em {certificate.issued}</p>
+                <code className="certificate-code">
+                  {certificate.validationCode}
+                </code>
+                <div className="certificate-actions">
+                  <a
+                    href={certificate.validationUrl}
+                    target="_blank"
+                    rel="noreferrer"
+                  >
+                    Validar certificado <ExternalLink size={13} />
+                  </a>
+                  <button
+                    onClick={() => {
+                      navigator.clipboard?.writeText(
+                        certificate.validationCode,
+                      );
+                    }}
+                  >
+                    <Copy size={13} /> Copiar código
+                  </button>
+                </div>
+              </article>
+            ))}
           </div>
-        </div>
-        <div className="quote-card">
-          “A melhor forma de prever o futuro é construí-lo.”
-        </div>
+          <p className="certificate-note">
+            Confirma cada certificado na página oficial FIAP com o respetivo
+            código de validação.
+          </p>
+        </section>
       </div>
     </div>
   );
 }
-function Resume({ say }) {
+function Resume() {
   return (
     <div className="app-scroll resume-app">
       <div className="resume-head">
         <div>
           <span className="eyebrow">DOCUMENTO PROFISSIONAL</span>
           <h2>Currículo</h2>
-          <p>Um resumo do meu percurso e das áreas em que estou a crescer.</p>
+          <p>
+            {profile.name} · {profile.role} · {profile.location}
+          </p>
         </div>
-        <button
-          className="primary"
-          onClick={() =>
-            say(
-              "Adicione o seu PDF em src/data.js para disponibilizar o download",
-            )
-          }
-        >
-          <Download size={16} /> Descarregar PDF
+        <button className="primary" onClick={() => window.print()}>
+          <Download size={16} /> Imprimir currículo
         </button>
       </div>
       <div className="resume-columns">
         <section>
-          <h3>Experiência & projetos</h3>
+          <h3>Experiência profissional</h3>
           <div className="timeline">
-            <div>
-              <span>2025 — agora</span>
-              <h4>Programador independente</h4>
-              <p>
-                Desenvolvimento de projetos pessoais e académicos com foco em
-                aplicações web, Java e APIs.
-              </p>
-            </div>
-            <div>
-              <span>2023 — agora</span>
-              <h4>Estudante de tecnologia</h4>
-              <p>
-                Aprendizagem contínua de fundamentos de programação, estruturas
-                de dados e engenharia de software.
-              </p>
-            </div>
+            {experience.map((item) => (
+              <div key={item.role}>
+                <span>ATIVIDADE PROFISSIONAL</span>
+                <h4>{item.role}</h4>
+                <p>{item.description}</p>
+                <ul>
+                  {item.activities.map((activity) => (
+                    <li key={activity}>{activity}</li>
+                  ))}
+                </ul>
+              </div>
+            ))}
           </div>
         </section>
         <section>
-          <h3>Formação</h3>
+          <h3>Formação académica</h3>
           <div className="timeline">
-            <div>
-              <span>EM CURSO</span>
-              <h4>Formação em tecnologia</h4>
-              <p>Adicione aqui a instituição, curso e datas da sua formação.</p>
-            </div>
+            {education.map((item) => (
+              <div key={item.degree}>
+                <span>{item.status.toUpperCase()}</span>
+                <h4>{item.degree}</h4>
+                <p>
+                  <b>{item.institution}</b>
+                </p>
+                <p>Área de interesse: {item.focus}</p>
+                <p>{item.description}</p>
+              </div>
+            ))}
           </div>
           <h3 className="resume-subhead">Idiomas</h3>
-          <p className="language-line">
-            Português <span>Fluente</span>
-          </p>
+          {languages.map((language) => (
+            <p className="language-line" key={language.name}>
+              {language.name}
+              <span>{language.level}</span>
+            </p>
+          ))}
+          <h3 className="resume-subhead">Certificações</h3>
+          <ul className="resume-certificates">
+            {certificates.map((certificate) => (
+              <li key={certificate.name}>
+                <b>{certificate.name}</b> — {certificate.workload},{" "}
+                {certificate.issued}.{" "}
+                <a
+                  href={certificate.validationUrl}
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  Validar
+                </a>
+              </li>
+            ))}
+          </ul>
+          <h3 className="resume-subhead">Competências técnicas</h3>
+          <div className="resume-skills">
+            {skills.map((category) => (
+              <p key={category.group}>
+                <b>{category.group}:</b> {category.items.join(", ")}
+              </p>
+            ))}
+          </div>
         </section>
       </div>
     </div>
@@ -1081,28 +1255,24 @@ function Skills() {
             <div className="skill-group-icon">0{i + 1}</div>
             <div>
               <h3>{g.group}</h3>
-              <p>
-                {i === 0
-                  ? "Linguagens que uso para dar vida às ideias."
-                  : i === 1
-                    ? "Ecossistema e ferramentas do meu fluxo de trabalho."
-                    : "Princípios que aplico ao desenvolver soluções."}
-              </p>
+              <p>{g.description}</p>
               <div className="skill-tags">
-                {g.items.map((s, j) => (
-                  <span key={s}>
-                    <i style={{ "--level": `${Math.max(48, 88 - j * 8)}%` }} />
-                    {s}
-                  </span>
+                {g.items.map((s) => (
+                  <span key={s}>{s}</span>
                 ))}
               </div>
             </div>
           </section>
         ))}
       </div>
-      <p className="skills-footnote">
-        Os níveis representam familiaridade pessoal e não uma avaliação formal.
-      </p>
+      <section className="complementary-skills">
+        <h3>Competências complementares</h3>
+        <div className="tag-row">
+          {complementarySkills.map((item) => (
+            <span key={item}>{item}</span>
+          ))}
+        </div>
+      </section>
     </div>
   );
 }
@@ -1117,47 +1287,100 @@ function Contacts({ say }) {
           com uma conversa.
         </h2>
         <p>
-          Tem um projeto em mente ou quer apenas trocar ideias? Estou a um
-          clique.
+          {profile.email && profile.whatsapp
+            ? "Tem um projeto em mente ou quer trocar ideias? Contacte-me por email ou WhatsApp."
+            : profile.email
+              ? "Tem um projeto em mente ou quer trocar ideias? Escreva-me por email."
+              : profile.whatsapp
+                ? "Tem um projeto em mente ou quer trocar ideias? Envie-me uma mensagem no WhatsApp."
+                : "Os canais de contacto serão adicionados assim que estiverem configurados."}
         </p>
-        <a className="primary" href={`mailto:${profile.email}`}>
-          <Mail size={17} /> Escrever um email <ArrowRight size={15} />
-        </a>
+        {profile.email && (
+          <a className="primary" href={`mailto:${profile.email}`}>
+            <Mail size={17} /> Escrever um email <ArrowRight size={15} />
+          </a>
+        )}
+        {profile.whatsapp && (
+          <a
+            className="primary"
+            href={`https://wa.me/${profile.whatsapp.replace(/\D/g, "")}`}
+            target="_blank"
+            rel="noreferrer"
+          >
+            <MessageCircle size={17} /> WhatsApp <ArrowRight size={15} />
+          </a>
+        )}
       </div>
       <div className="contact-links">
-        <div>
-          <span>Email</span>
-          <b>{profile.email}</b>
-          <button
-            onClick={() => {
-              navigator.clipboard?.writeText(profile.email);
-              say("Email copiado");
-            }}
+        {profile.email && (
+          <div>
+            <span>Email</span>
+            <b>{profile.email}</b>
+            <button
+              onClick={() => {
+                navigator.clipboard?.writeText(profile.email);
+                say("Email copiado");
+              }}
+            >
+              <Copy size={15} /> Copiar
+            </button>
+          </div>
+        )}
+        {profile.whatsapp && (
+          <a
+            href={`https://wa.me/${profile.whatsapp.replace(/\D/g, "")}`}
+            target="_blank"
+            rel="noreferrer"
           >
-            <Copy size={15} /> Copiar
-          </button>
-        </div>
-        <a href={profile.github} target="_blank" rel="noreferrer">
-          <Github size={18} />
-          <span>
-            <small>CODE & PROJETOS</small>
-            <b>GitHub</b>
-          </span>
-          <ExternalLink size={15} />
-        </a>
-        <a href={profile.linkedin} target="_blank" rel="noreferrer">
-          <Linkedin size={18} />
-          <span>
-            <small>REDE PROFISSIONAL</small>
-            <b>LinkedIn</b>
-          </span>
-          <ExternalLink size={15} />
-        </a>
+            <MessageCircle size={18} />
+            <span>
+              <small>CONTACTO DIRETO</small>
+              <b>{profile.whatsapp}</b>
+            </span>
+            <ExternalLink size={15} />
+          </a>
+        )}
+        {profile.github && (
+          <a href={profile.github} target="_blank" rel="noreferrer">
+            <Github size={18} />
+            <span>
+              <small>CODE & PROJETOS</small>
+              <b>GitHub · Jaimelxrd</b>
+            </span>
+            <ExternalLink size={15} />
+          </a>
+        )}
+        {profile.linkedin && (
+          <a href={profile.linkedin} target="_blank" rel="noreferrer">
+            <Linkedin size={18} />
+            <span>
+              <small>REDE PROFISSIONAL</small>
+              <b>LinkedIn</b>
+            </span>
+            <ExternalLink size={15} />
+          </a>
+        )}
+        {profile.otherProfiles.map((item) => (
+          <a href={item.url} target="_blank" rel="noreferrer" key={item.name}>
+            <ExternalLink size={18} />
+            <span>
+              <small>PERFIL PROFISSIONAL</small>
+              <b>{item.name}</b>
+            </span>
+            <ExternalLink size={15} />
+          </a>
+        ))}
       </div>
-      <p className="contact-note">
-        <span className="online-dot" /> Normalmente respondo dentro de 1–2 dias
-        úteis.
-      </p>
+      {!profile.email &&
+        !profile.whatsapp &&
+        !profile.github &&
+        !profile.linkedin &&
+        !profile.otherProfiles.length && (
+          <p className="contact-empty">
+            Os canais profissionais serão apresentados assim que forem
+            configurados.
+          </p>
+        )}
     </div>
   );
 }
@@ -1172,7 +1395,7 @@ function SettingsApp({ settings, setPref, say }) {
     <div className="settings-layout">
       <aside className="settings-sidebar">
         <div className="settings-user">
-          <span className="profile-avatar">J</span>
+          <span className="profile-avatar">JN</span>
           <span>
             <b>{profile.name}</b>
             <small>Conta local</small>
